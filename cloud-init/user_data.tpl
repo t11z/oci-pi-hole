@@ -1,7 +1,7 @@
 #!/bin/bash
 # ============================================================
 #  cloud-init user_data — Pi-hole on OCI Rocky Linux 9
-#  Rendered by Terraform templatefile(); all ${...} below
+#  Rendered by Terraform templatefile(); all $${...} below
 #  that are NOT Terraform variables use $${...} escaping.
 # ============================================================
 set -euo pipefail
