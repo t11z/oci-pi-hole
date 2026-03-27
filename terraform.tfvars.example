@@ -1,0 +1,54 @@
+# ============================================================
+#  terraform.tfvars.example
+#  Copy to terraform.tfvars and fill in your values.
+#  NEVER commit terraform.tfvars to version control!
+# ============================================================
+
+# ─── OCI API Credentials ──────────────────────────────────
+# Generate via: oci setup config  (requires OCI CLI)
+# or manually at https://cloud.oracle.com > Profile > API Keys
+
+tenancy_ocid     = "ocid1.tenancy.oc1..aaaaaaaaxxx"
+user_ocid        = "ocid1.user.oc1..aaaaaaaaxxx"
+fingerprint      = "aa:bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99"
+private_key_path = "~/.oci/oci_api_key.pem"
+region           = "eu-frankfurt-1"
+
+# The compartment where all resources are created.
+# Use your tenancy's root compartment OCID, or create a dedicated one.
+compartment_ocid = "ocid1.compartment.oc1..aaaaaaaaxxx"
+
+# ─── Instance ─────────────────────────────────────────────
+# Free Tier: up to 4 OCPUs + 24 GiB RAM total across all A1 instances.
+
+instance_ocpus         = 2
+instance_memory_in_gbs = 12
+boot_volume_size_in_gbs = 50
+
+# If Rocky Linux is not found automatically, set an explicit image OCID.
+# Find OCIDs at https://rockylinux.org/cloud-images (OCI tab) or:
+#   oci compute image list --compartment-id <compartment_ocid> \
+#     --operating-system "Rocky Linux" --shape VM.Standard.A1.Flex
+# image_ocid = "ocid1.image.oc1.eu-frankfurt-1.aaaaaaaaxxx"
+image_ocid = ""
+
+# Your SSH public key (the content, not the file path)
+ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI... user@host"
+
+# ─── Pi-hole ──────────────────────────────────────────────
+pihole_password = "change-me-please"
+timezone        = "Europe/Berlin"
+
+# DNS-over-TLS upstream resolvers
+# Cloudflare:    tls://1.1.1.1  /  tls://1.0.0.1
+# Google:        tls://8.8.8.8  /  tls://8.8.4.4
+# Quad9:         tls://9.9.9.9  /  tls://149.112.112.112
+pihole_dns_upstream1 = "tls://1.1.1.1"
+pihole_dns_upstream2 = "tls://1.0.0.1"
+
+# ─── Dynamic Firewall ─────────────────────────────────────
+# A DynDNS hostname that resolves to your home/office IP.
+# SSH (22), DoT (853) and the Pi-hole web UI (80/443) are
+# restricted to this IP and updated every 60 seconds.
+# Examples: myhome.duckdns.org  |  home.example.com
+allowed_dynamic_hostname = "myhome.duckdns.org"
