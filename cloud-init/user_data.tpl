@@ -115,7 +115,7 @@ tls://.:853 {
 COREFILE_EOF
 
 # docker-compose.yml
-# Note: $${VAR} here becomes ${VAR} in the file → docker compose expands from .env
+# Note: $${VAR} here becomes $${VAR} in the file → docker compose expands from .env
 cat > /opt/pihole/docker-compose.yml << 'COMPOSE_EOF'
 # Pi-hole + CoreDNS DoT proxy
 # Managed by Terraform / cloud-init — edit with care.
