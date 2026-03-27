@@ -1,7 +1,7 @@
 #!/bin/bash
 # ============================================================
 #  cloud-init user_data — Pi-hole on OCI Rocky Linux 9
-#  Rendered by Terraform templatefile(); all ${...} below
+#  Rendered by Terraform templatefile(); all $${...} below
 #  that are NOT Terraform variables use $${...} escaping.
 # ============================================================
 set -euo pipefail
@@ -132,9 +132,9 @@ services:
       - "80:80/tcp"
       - "443:443/tcp"
     environment:
-      TZ: "${PIHOLE_TZ}"
-      FTLCONF_webserver_api_password: "${PIHOLE_PASSWORD}"
-      FTLCONF_dns_upstreams: "${PIHOLE_DNS_UPSTREAM1};${PIHOLE_DNS_UPSTREAM2}"
+      TZ: "$${PIHOLE_TZ}"
+      FTLCONF_webserver_api_password: "$${PIHOLE_PASSWORD}"
+      FTLCONF_dns_upstreams: "$${PIHOLE_DNS_UPSTREAM1};$${PIHOLE_DNS_UPSTREAM2}"
       FTLCONF_dns_dnssec: "true"
       FTLCONF_dns_listeningMode: "all"
       FTLCONF_dns_blocking_enabled: "true"
@@ -218,7 +218,7 @@ apply_update() {
     log "Update applied successfully."
 }
 
-case "${1:-}" in
+case "$${1:-}" in
     check) check_for_update ;;
     apply) apply_update ;;
     *)
@@ -247,7 +247,7 @@ IPSET=home-ips
 
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >> "$LOG"; }
 
-if [ -z "${ALLOWED_DYNAMIC_HOSTNAME:-}" ]; then
+if [ -z "$${ALLOWED_DYNAMIC_HOSTNAME:-}" ]; then
     log "ERROR: ALLOWED_DYNAMIC_HOSTNAME is not set."
     exit 1
 fi
@@ -267,7 +267,7 @@ if [ "$NEW_IP" = "$OLD_IP" ]; then
     exit 0   # No change — fast exit, runs every minute
 fi
 
-log "IP changed: ${OLD_IP:-<none>} → $NEW_IP"
+log "IP changed: $${OLD_IP:-<none>} → $NEW_IP"
 
 # Remove old entry (runtime + permanent)
 if [ -n "$OLD_IP" ]; then
