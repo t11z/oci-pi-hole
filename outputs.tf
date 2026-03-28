@@ -30,5 +30,5 @@ output "dot_server" {
 
 output "ssh_command" {
   description = "SSH command to connect to the instance"
-  value       = "ssh opc@${oci_core_instance.pihole.public_ip}"
+  value       = "ssh ubuntu@${oci_core_instance.pihole.public_ip}"
 }
