@@ -97,14 +97,15 @@ fi
 
 # ─── 5. Create Pi-hole directory structure ────────────────
 echo "[5/9] Preparing Pi-hole directories..."
-mkdir -p /opt/pihole/certs /opt/pihole/coredns
+mkdir -p /opt/pihole/certs /opt/pihole/coredns /opt/pihole/nginx
 
-# Generate self-signed TLS certificate for DoT
+# Generate self-signed TLS certificate (shared by DoT/CoreDNS and nginx HTTPS)
 openssl req -x509 -newkey rsa:4096 \
     -keyout /opt/pihole/certs/key.pem \
     -out    /opt/pihole/certs/cert.pem \
     -days 3650 -nodes \
-    -subj "/CN=pihole-dot/O=Pi-hole/C=DE" \
+    -subj "/CN=pihole.local/O=Pi-hole/C=DE" \
+    -addext "subjectAltName=DNS:pihole.local,DNS:localhost,IP:127.0.0.1" \
     2>/dev/null
 chmod 640 /opt/pihole/certs/key.pem /opt/pihole/certs/cert.pem
 
@@ -133,10 +134,39 @@ tls://.:853 {
 }
 COREFILE_EOF
 
+# nginx.conf – minimal HTTPS reverse proxy for Pi-hole web UI
+cat > /opt/pihole/nginx/nginx.conf << 'NGINX_EOF'
+# Redirect plain HTTP → HTTPS
+server {
+    listen 80;
+    return 301 https://$host$request_uri;
+}
+
+# HTTPS frontend for Pi-hole
+server {
+    listen 443 ssl;
+
+    ssl_certificate     /etc/nginx/certs/cert.pem;
+    ssl_certificate_key /etc/nginx/certs/key.pem;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+    ssl_session_cache   shared:SSL:10m;
+    ssl_session_timeout 10m;
+
+    location / {
+        proxy_pass         http://pihole:80;
+        proxy_set_header   Host              $http_host;
+        proxy_set_header   X-Real-IP         $remote_addr;
+        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+    }
+}
+NGINX_EOF
+
 # docker-compose.yml
 # Note: $${VAR} here becomes $${VAR} in the file → docker compose expands from .env
 cat > /opt/pihole/docker-compose.yml << 'COMPOSE_EOF'
-# Pi-hole + CoreDNS DoT proxy
+# Pi-hole + CoreDNS DoT proxy + nginx HTTPS frontend
 # Managed by Terraform / cloud-init — edit with care.
 services:
 
@@ -148,8 +178,7 @@ services:
     ports:
       - "53:53/tcp"
       - "53:53/udp"
-      - "80:80/tcp"
-      - "443:443/tcp"
+      # Web UI is NOT exposed directly; nginx handles 80/443 on the host
     environment:
       TZ: "$${PIHOLE_TZ}"
       FTLCONF_webserver_api_password: "$${PIHOLE_PASSWORD}"
@@ -175,6 +204,21 @@ services:
     volumes:
       - /opt/pihole/coredns:/etc/coredns:ro
       - /opt/pihole/certs:/etc/coredns/certs:ro
+    depends_on:
+      - pihole
+    networks:
+      - pihole_net
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80/tcp"
+      - "443:443/tcp"
+    volumes:
+      - /opt/pihole/nginx/nginx.conf:/etc/nginx/conf.d/pihole.conf:ro
+      - /opt/pihole/certs:/etc/nginx/certs:ro
     depends_on:
       - pihole
     networks:
@@ -374,6 +418,6 @@ done
 
 echo "========================================================"
 echo " Setup complete: $(date)"
-echo " Pi-hole admin : http://$(curl -s ifconfig.me)/admin"
+echo " Pi-hole admin : https://$(curl -s ifconfig.me)/admin  (self-signed cert)"
 echo " DoT server    : $(curl -s ifconfig.me):853"
 echo "========================================================"
