@@ -12,6 +12,7 @@ PIHOLE_TZ='${pihole_timezone}'
 ALLOWED_DYNAMIC_HOSTNAME='${allowed_dynamic_hostname}'
 PIHOLE_DNS_UPSTREAM1='${pihole_dns_upstream1}'
 PIHOLE_DNS_UPSTREAM2='${pihole_dns_upstream2}'
+PIHOLE_DNS_TLS_SERVERNAME='${pihole_dns_tls_servername}'
 
 # ─── Logging ──────────────────────────────────────────────
 LOG=/var/log/pihole-cloud-init.log
@@ -121,8 +122,10 @@ PIHOLE_DNS_UPSTREAM2=$PIHOLE_DNS_UPSTREAM2
 ENV_EOF
 chmod 600 /opt/pihole/.env
 
-# CoreDNS Corefile – accepts DoT on :853, forwards to Pi-hole
-cat > /opt/pihole/coredns/Corefile << 'COREFILE_EOF'
+# CoreDNS Corefile – accepts DoT on :853, forwards to Pi-hole;
+# second block accepts plain DNS on :5053 (Pi-hole upstream) and forwards to Cloudflare via DoT.
+# Note: unquoted heredoc so $PIHOLE_DNS_* variables expand at cloud-init runtime.
+cat > /opt/pihole/coredns/Corefile << COREFILE_EOF
 tls://.:853 {
     tls /etc/coredns/certs/cert.pem /etc/coredns/certs/key.pem
     forward . pihole:53 {
@@ -131,6 +134,15 @@ tls://.:853 {
     log
     errors
     health :8081
+}
+
+.:5053 {
+    forward . $PIHOLE_DNS_UPSTREAM1 $PIHOLE_DNS_UPSTREAM2 {
+        tls_servername $PIHOLE_DNS_TLS_SERVERNAME
+    }
+    cache
+    loop
+    errors
 }
 COREFILE_EOF
 
@@ -182,10 +194,9 @@ services:
     environment:
       TZ: "$${PIHOLE_TZ}"
       FTLCONF_webserver_api_password: "$${PIHOLE_PASSWORD}"
-      FTLCONF_dns_upstreams: "$${PIHOLE_DNS_UPSTREAM1};$${PIHOLE_DNS_UPSTREAM2}"
+      FTLCONF_dns_upstreams: "coredns-dot:5053"
       FTLCONF_dns_dnssec: "true"
       FTLCONF_dns_listeningMode: "all"
-      FTLCONF_dns_blocking_enabled: "true"
     volumes:
       - pihole_data:/etc/pihole
       - dnsmasq_data:/etc/dnsmasq.d

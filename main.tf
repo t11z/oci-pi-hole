@@ -217,8 +217,9 @@ resource "oci_core_instance" "pihole" {
       pihole_password          = var.pihole_password
       pihole_timezone          = var.timezone
       allowed_dynamic_hostname = var.allowed_dynamic_hostname
-      pihole_dns_upstream1     = var.pihole_dns_upstream1
-      pihole_dns_upstream2     = var.pihole_dns_upstream2
+      pihole_dns_upstream1      = var.pihole_dns_upstream1
+      pihole_dns_upstream2      = var.pihole_dns_upstream2
+      pihole_dns_tls_servername = var.pihole_dns_tls_servername
     }))
   }
 

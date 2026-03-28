@@ -122,6 +122,16 @@ variable "pihole_dns_upstream2" {
   default     = "tls://1.0.0.1"
 }
 
+variable "pihole_dns_tls_servername" {
+  description = <<-EOT
+    TLS server name (SNI) used by CoreDNS to verify the DoT upstream certificate.
+    Must match the upstream provider's certificate hostname.
+    Cloudflare: cloudflare-dns.com | Google: dns.google | Quad9: dns.quad9.net
+  EOT
+  type    = string
+  default = "cloudflare-dns.com"
+}
+
 # ─── Dynamic Firewall ─────────────────────────────────────
 
 variable "allowed_dynamic_hostname" {
