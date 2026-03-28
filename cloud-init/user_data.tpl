@@ -108,6 +108,7 @@ openssl req -x509 -newkey rsa:4096 \
     -subj "/CN=pihole.local/O=Pi-hole/C=DE" \
     -addext "subjectAltName=DNS:pihole.local,DNS:localhost,IP:127.0.0.1" \
     2>/dev/null
+chown 65532:65532 /opt/pihole/certs/key.pem /opt/pihole/certs/cert.pem
 chmod 640 /opt/pihole/certs/key.pem /opt/pihole/certs/cert.pem
 
 # ─── 6. Write config files ────────────────────────────────
