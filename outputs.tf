@@ -14,8 +14,8 @@ output "instance_ocid" {
 }
 
 output "pihole_admin_url" {
-  description = "Pi-hole web admin URL"
-  value       = "http://${oci_core_instance.pihole.public_ip}/admin"
+  description = "Pi-hole web admin URL (HTTPS via nginx, self-signed certificate)"
+  value       = "https://${oci_core_instance.pihole.public_ip}/admin"
 }
 
 output "dns_server" {
