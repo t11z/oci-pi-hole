@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================
-#  cloud-init user_data — Pi-hole on OCI Rocky Linux 9
+#  cloud-init user_data — Pi-hole on OCI Ubuntu 24.04
 #  Rendered by Terraform templatefile(); all $${...} below
 #  that are NOT Terraform variables use $${...} escaping.
 # ============================================================
@@ -22,25 +22,44 @@ echo "========================================================"
 
 # ─── 1. System update & base packages ─────────────────────
 echo "[1/9] System update..."
-dnf update -y --quiet
-dnf install -y --quiet \
-    curl wget git bind-utils jq openssl \
-    firewalld python3-firewall
+export DEBIAN_FRONTEND=noninteractive
+apt-get update -qq
+apt-get upgrade -y -qq
+apt-get install -y -qq \
+    curl wget git dnsutils jq openssl \
+    firewalld ca-certificates
 
 systemctl enable --now firewalld
 
-# ─── 2. Install Docker from Docker's official RHEL repo ───
+# Disable systemd-resolved stub listener (frees up port 53 for Pi-hole)
+mkdir -p /etc/systemd/resolved.conf.d
+cat > /etc/systemd/resolved.conf.d/pihole.conf << 'RESOLVED_EOF'
+[Resolve]
+DNSStubListener=no
+RESOLVED_EOF
+systemctl restart systemd-resolved
+
+# ─── 2. Install Docker from Docker's official Ubuntu repo ──
 echo "[2/9] Installing Docker..."
-dnf config-manager \
-    --add-repo https://download.docker.com/linux/rhel/docker-ce.repo
-dnf install -y --quiet \
+install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+    -o /etc/apt/keyrings/docker.asc
+chmod a+r /etc/apt/keyrings/docker.asc
+
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] \
+  https://download.docker.com/linux/ubuntu noble stable" | \
+  tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+apt-get update -qq
+apt-get install -y -qq \
     docker-ce docker-ce-cli containerd.io \
     docker-buildx-plugin docker-compose-plugin
 
 systemctl enable --now docker
 
-# Add opc user to docker group
-usermod -aG docker opc
+# Add ubuntu user to docker group
+usermod -aG docker ubuntu
 
 # ─── 3. Configure firewalld ───────────────────────────────
 echo "[3/9] Configuring firewalld..."

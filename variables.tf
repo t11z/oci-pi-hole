@@ -66,9 +66,9 @@ variable "boot_volume_size_in_gbs" {
 
 variable "image_ocid" {
   description = <<-EOT
-    Explicit Rocky Linux 9 image OCID. Leave empty to auto-detect.
-    Find your region's OCID at:
-    https://rockylinux.org/cloud-images  (OCI tab)
+    Explicit Ubuntu 24.04 image OCID. Leave empty to auto-detect.
+    Find available OCIDs via:
+    oci compute image list --compartment-id <ocid> --operating-system "Canonical Ubuntu" --shape VM.Standard.A1.Flex
   EOT
   type        = string
   default     = ""
