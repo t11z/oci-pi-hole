@@ -41,7 +41,7 @@ data "oci_core_images" "rocky_linux" {
 }
 
 locals {
-  instance_image_id = var.image_ocid != "" ? var.image_ocid : data.oci_core_images.rocky_linux[0].images[0].id
+  instance_image_id = var.image_ocid != "" ? var.image_ocid : try(data.oci_core_images.rocky_linux[0].images[0].id, null)
 }
 
 # ─── VCN ──────────────────────────────────────────────────
@@ -220,6 +220,13 @@ resource "oci_core_instance" "pihole" {
       pihole_dns_upstream1     = var.pihole_dns_upstream1
       pihole_dns_upstream2     = var.pihole_dns_upstream2
     }))
+  }
+
+  lifecycle {
+    precondition {
+      condition     = local.instance_image_id != null
+      error_message = "No Rocky Linux 9 image found for shape VM.Standard.A1.Flex in this region/compartment. Set var.image_ocid explicitly."
+    }
   }
 
   timeouts {
