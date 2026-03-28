@@ -6,7 +6,7 @@
   Your Home                       OCI Free Tier (Ampere A1)
   ──────────                       ──────────────────────────────────────────────
                                   ┌─────────────────────────────────────────────┐
-  Laptop / Phone                  │  Rocky Linux 9                              │
+  Laptop / Phone                  │  Ubuntu 24.04                               │
   ┌──────────┐   DoT :853 (TLS)  │  ┌─────────────────┐   ┌─────────────────┐ │
   │  Client  │ ────────────────► │  │  CoreDNS (DoT)  │──►│    Pi-hole      │ │
   └──────────┘                   │  │   port 853      │   │   port 53       │ │
@@ -33,7 +33,7 @@
 |---|---|
 | **Cloud** | Oracle Cloud Infrastructure — Always Free Tier |
 | **Instance** | `VM.Standard.A1.Flex` · Ampere ARM64 · 2 vCPU · 12 GiB RAM |
-| **OS** | Rocky Linux 9 |
+| **OS** | Ubuntu 24.04 LTS |
 | **DNS** | Pi-hole latest (Docker) |
 | **Upstream** | DNS-over-TLS to Cloudflare / Google / Quad9 |
 | **DoT server** | CoreDNS on port 853 — clients connect with encrypted DNS |
@@ -95,7 +95,7 @@ Terraform will print the public IP and all relevant URLs when done. The instance
 
 ```bash
 # SSH in (your DynDNS hostname must resolve first)
-ssh opc@<public-ip>
+ssh ubuntu@<public-ip>
 
 # Watch setup log
 sudo tail -f /var/log/pihole-cloud-init.log
@@ -136,9 +136,9 @@ instance_memory_in_gbs  = 12    # Free Tier total: 24 GiB
 boot_volume_size_in_gbs = 50    # Free Tier total: 200 GiB block storage
 ```
 
-### Rocky Linux image
+### Ubuntu image
 
-The provider searches for the latest Rocky Linux 9 image for the `VM.Standard.A1.Flex` shape automatically. If your region doesn't have it or you want a specific version, override it:
+The provider searches for the latest Ubuntu 24.04 image for the `VM.Standard.A1.Flex` shape automatically. If your region doesn't have it or you want a specific version, override it:
 
 ```hcl
 image_ocid = "ocid1.image.oc1.eu-frankfurt-1.aaa..."
@@ -148,12 +148,11 @@ Find OCIDs via CLI:
 ```bash
 oci compute image list \
   --compartment-id <compartment_ocid> \
-  --operating-system "Rocky Linux" \
+  --operating-system "Canonical Ubuntu" \
+  --operating-system-version "24.04" \
   --shape VM.Standard.A1.Flex \
   --query "data[0].id" --raw-output
 ```
-
-Or check the [Rocky Linux cloud images page](https://rockylinux.org/cloud-images).
 
 ### Pi-hole
 
@@ -297,7 +296,7 @@ Replace the self-signed certificate with a Let's Encrypt cert using [certbot](ht
 
 ```bash
 # On the instance (requires a domain pointing to the public IP)
-sudo dnf install -y certbot
+sudo apt-get install -y certbot
 
 sudo certbot certonly --standalone \
     -d your.domain.example \

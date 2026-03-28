@@ -27,13 +27,13 @@ locals {
   ad_name = data.oci_identity_availability_domains.ads.availability_domains[var.availability_domain_index].name
 }
 
-# Rocky Linux 9 image – auto-detected unless overridden via var.image_ocid
-data "oci_core_images" "rocky_linux" {
+# Ubuntu 24.04 image – auto-detected unless overridden via var.image_ocid
+data "oci_core_images" "ubuntu" {
   count = var.image_ocid == "" ? 1 : 0
 
   compartment_id           = var.compartment_ocid
-  operating_system         = "Rocky Linux"
-  operating_system_version = "9"
+  operating_system         = "Canonical Ubuntu"
+  operating_system_version = "24.04"
   shape                    = "VM.Standard.A1.Flex"
   sort_by                  = "TIMECREATED"
   sort_order               = "DESC"
@@ -41,7 +41,7 @@ data "oci_core_images" "rocky_linux" {
 }
 
 locals {
-  instance_image_id = var.image_ocid != "" ? var.image_ocid : try(data.oci_core_images.rocky_linux[0].images[0].id, null)
+  instance_image_id = var.image_ocid != "" ? var.image_ocid : try(data.oci_core_images.ubuntu[0].images[0].id, null)
 }
 
 # ─── VCN ──────────────────────────────────────────────────
@@ -225,7 +225,7 @@ resource "oci_core_instance" "pihole" {
   lifecycle {
     precondition {
       condition     = local.instance_image_id != null
-      error_message = "No Rocky Linux 9 image found for shape VM.Standard.A1.Flex in this region/compartment. Set var.image_ocid explicitly."
+      error_message = "No Ubuntu 24.04 image found for shape VM.Standard.A1.Flex in this region/compartment. Set var.image_ocid explicitly."
     }
   }
 

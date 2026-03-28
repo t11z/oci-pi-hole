@@ -25,10 +25,10 @@ instance_ocpus         = 2
 instance_memory_in_gbs = 12
 boot_volume_size_in_gbs = 50
 
-# If Rocky Linux is not found automatically, set an explicit image OCID.
-# Find OCIDs at https://rockylinux.org/cloud-images (OCI tab) or:
+# If Ubuntu 24.04 is not found automatically, set an explicit image OCID.
+# Find OCIDs via:
 #   oci compute image list --compartment-id <compartment_ocid> \
-#     --operating-system "Rocky Linux" --shape VM.Standard.A1.Flex
+#     --operating-system "Canonical Ubuntu" --shape VM.Standard.A1.Flex
 # image_ocid = "ocid1.image.oc1.eu-frankfurt-1.aaaaaaaaxxx"
 image_ocid = ""
 
