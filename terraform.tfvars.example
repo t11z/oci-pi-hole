@@ -43,8 +43,11 @@ timezone        = "Europe/Berlin"
 # Cloudflare:    tls://1.1.1.1  /  tls://1.0.0.1
 # Google:        tls://8.8.8.8  /  tls://8.8.4.4
 # Quad9:         tls://9.9.9.9  /  tls://149.112.112.112
-pihole_dns_upstream1 = "tls://1.1.1.1"
-pihole_dns_upstream2 = "tls://1.0.0.1"
+pihole_dns_upstream1      = "tls://1.1.1.1"
+pihole_dns_upstream2      = "tls://1.0.0.1"
+pihole_dns_tls_servername = "cloudflare-dns.com"  # Cloudflare
+# pihole_dns_tls_servername = "dns.google"          # Google
+# pihole_dns_tls_servername = "dns.quad9.net"        # Quad9
 
 # ─── Dynamic Firewall ─────────────────────────────────────
 # A DynDNS hostname that resolves to your home/office IP.
