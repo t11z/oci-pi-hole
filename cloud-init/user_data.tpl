@@ -129,7 +129,7 @@ chmod 600 /opt/pihole/.env
 cat > /opt/pihole/coredns/Corefile << COREFILE_EOF
 tls://.:853 {
     tls /etc/coredns/certs/cert.pem /etc/coredns/certs/key.pem
-    forward . pihole:53 {
+    forward . 172.20.0.2:53 {
         prefer_udp
     }
     log
@@ -195,7 +195,7 @@ services:
     environment:
       TZ: "$${PIHOLE_TZ}"
       FTLCONF_webserver_api_password: "$${PIHOLE_PASSWORD}"
-      FTLCONF_dns_upstreams: "coredns-dot:5053"
+      FTLCONF_dns_upstreams: "172.20.0.3#5053"
       FTLCONF_dns_dnssec: "true"
       FTLCONF_dns_listeningMode: "all"
     volumes:
@@ -204,7 +204,8 @@ services:
     cap_add:
       - NET_ADMIN
     networks:
-      - pihole_net
+      pihole_net:
+        ipv4_address: 172.20.0.2
 
   coredns-dot:
     image: coredns/coredns:latest
@@ -219,7 +220,8 @@ services:
     depends_on:
       - pihole
     networks:
-      - pihole_net
+      pihole_net:
+        ipv4_address: 172.20.0.3
 
   nginx:
     image: nginx:alpine
