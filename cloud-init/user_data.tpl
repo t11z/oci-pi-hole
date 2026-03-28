@@ -97,7 +97,7 @@ fi
 
 # ─── 5. Create Pi-hole directory structure ────────────────
 echo "[5/9] Preparing Pi-hole directories..."
-mkdir -p /opt/pihole/certs /opt/pihole/coredns /opt/pihole/nginx
+mkdir -p /opt/pihole/certs /opt/pihole/coredns/certs /opt/pihole/nginx
 
 # Generate self-signed TLS certificate (shared by DoT/CoreDNS and nginx HTTPS)
 openssl req -x509 -newkey rsa:4096 \
